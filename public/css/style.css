@@ -114,6 +114,10 @@ body {
    height: 42px;
  }
 
+ .edit-btn:hover {
+    opacity: 0.7;
+ }
+ 
  /* Show page */
 
  .show-img {
