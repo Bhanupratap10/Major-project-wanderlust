@@ -9,6 +9,8 @@ const wrapAsync = require("./utlis/wrapAsync.js");
 const ExpressError = require("./utlis/ExpressError");
 const { required } = require("joi");
 const { listingSchema } = require("./schema.js");
+const Review = require("./models/review.js");
+
 
 const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
 
@@ -36,8 +38,8 @@ app.get("/", (req, res) => {
 });
 
 const validateListing = (req, res, next) => {
-    let (error) = listingSchema.validate(req.body); 
-    if (error) {
+    let {err} = listingSchema.validate(req.body); 
+    if (err) {
         let errMsg = err.details.map((el) => el.message).join(",");
       throw new ExpressError(400, errMsg);
     } else {
@@ -46,7 +48,9 @@ const validateListing = (req, res, next) => {
 };
 
 // index route
-app.get("/listings",  wrapAsync (async (req, res) => {
+app.get(
+    "/listings", 
+     wrapAsync (async (req, res) => {
      const allListings = await Listing.find({});
      res.render("listings/index.ejs", { allListings });
 
@@ -61,7 +65,9 @@ app.get("/listings/new", (req, res) => {
 
 // Show Route
 
-app.get("/listings/:id", wrapAsync (async (req, res) => {
+app.get(
+    "/listings/:id", 
+    wrapAsync (async (req, res) => {
     let {id} = req.params;
    const listing = await  Listing.findById(id)
    res.render("listings/show.ejs", { listing });
@@ -96,7 +102,7 @@ app.put(
     validateListing,
     wrapAsync (async (req, res) => { 
     let { id } = req.params;
-   await Listing.findByIdAndUpdate(id, {...req.body.listing});
+   await Listing.findByIdAndUpdate(id, { ...req.body.listing });
    res.redirect(`/listings/${id}`);
 }));
 
@@ -105,9 +111,26 @@ app.put(
     "/listings/:id", 
     wrapAsync (async (req, res) => {
     let { id } = req.params;
-    let deleteListing = await Listing.findByIdAndDelete(id);
+    let deletedListing = await Listing.findByIdAndDelete(id);
+    console.log(deletedListing)
     res.redirect("/listings");
- }));
+ })
+);
+
+//Review
+//Post Route
+app.post("/listings/:id/reviews", async (req, res) => {
+    let listing = await Listing.findById(req.params.id);
+    let newReview = new Review(req.body.review);
+
+    listing.reviews.push(newReview);
+
+    await newReview.save();
+    await listing.save();
+
+    console.log("new review saved");
+    res.send("new review saved");
+});
 
 // app.get("/testListing", async (req, res) => {
 //     let samplelisting =  new Listing ({
@@ -123,8 +146,9 @@ app.put(
 //     res.send("successful testing");
 
 // });
+
 app.all("*", (req, res, next) => {
-    next(new ExpressError(404, "Page Not found"));
+    next(new ExpressError(404, "Page Not found")); 
 });
 
 app.use((err, req, res, next) => {

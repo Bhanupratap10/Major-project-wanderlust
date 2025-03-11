@@ -13,12 +13,20 @@ const listingSchema = new Schema ({
           type: String,
           default: "",
           set: (v) =>
-              v === "" ? "" :v,
+              v === "" 
+             ? ""
+             :v,
          },
   },
   price: Number,
   location: String,
   country: String,
+  review: [
+     {
+      type: Schema.Types.ObjectId,
+      ref: "Review",
+     },
+  ],
 }); 
 
 const Listing = mongoose.model("Listing", listingSchema);
