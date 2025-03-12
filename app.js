@@ -8,7 +8,7 @@ const ejsMate = require("ejs-mate");
 const wrapAsync = require("./utlis/wrapAsync.js");
 const ExpressError = require("./utlis/ExpressError");
 const { required } = require("joi");
-const { listingSchema } = require("./schema.js");
+const { listingSchema, reviewSchema } = require("./schema.js");
 const Review = require("./models/review.js");
 
 
@@ -37,8 +37,20 @@ app.get("/", (req, res) => {
 
 });
 
+// validated listing method
 const validateListing = (req, res, next) => {
     let {err} = listingSchema.validate(req.body); 
+    if (err) {
+        let errMsg = err.details.map((el) => el.message).join(",");
+      throw new ExpressError(400, errMsg);
+    } else {
+      next();
+    }
+};
+
+// validated review method
+const validateReview = (req, res, next) => {
+    let { err } = reviewSchema.validate(req.body); 
     if (err) {
         let errMsg = err.details.map((el) => el.message).join(",");
       throw new ExpressError(400, errMsg);
@@ -119,18 +131,18 @@ app.put(
 
 //Review
 //Post Route
-app.post("/listings/:id/reviews", async (req, res) => {
+app.post("/listings/:id/reviews", validateReview,
+     wrapAsync (async (req, res) => {
     let listing = await Listing.findById(req.params.id);
     let newReview = new Review(req.body.review);
-
-    listing.reviews.push(newReview);
+    console.log(req.params.id);
+    listing.review.push(newReview);
 
     await newReview.save();
     await listing.save();
 
-    console.log("new review saved");
-    res.send("new review saved");
-});
+    res.redirect(`/listings/${listing._id}`);
+}));
 
 // app.get("/testListing", async (req, res) => {
 //     let samplelisting =  new Listing ({
