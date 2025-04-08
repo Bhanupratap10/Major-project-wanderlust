@@ -5,7 +5,7 @@ const map = new mapboxgl.Map({
     // choose from Mapbox's core style, or make ypur own style with Mapbox studio
     style: "mapbox://styles/mapbox/streets-v12", // style url
     center: listing.geometry.coordinates, // starting position [lng, lat]. Note that lat must be set between -90 and 90
-    zoom: 7, // starting zoom
+    zoom: 5, // starting zoom
 });
 
 const marker = new mapboxgl.Marker({color: "red"})
