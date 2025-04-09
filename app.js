@@ -11,6 +11,7 @@ const ejsMate = require("ejs-mate");
 const ExpressError = require("./utlis/ExpressError.js");
 const { required } = require("joi");
 const session = require("express-session");
+
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
@@ -21,6 +22,7 @@ const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 
 const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
+//const dbUrl = process.env.ATLASDB_URL;
 
 main().then(() => {
     console.log("connected to DB");
@@ -30,7 +32,7 @@ main().then(() => {
 });
 
 async function main() { // creating database
-    await mongoose.connect(MONGO_URL);
+    await mongoose.connect(MONGO_URL);  // MONGO_URL
 }
 
 app.set("view engine", "ejs");
@@ -40,7 +42,20 @@ app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
 
+// const store = MongoStore.create({
+//     mongoUrl: dbUrl,
+//     crypto: {
+//         secret: "mysupersecretstring", 
+//     },
+//     touchAfter: 24 * 3600,
+// });
+
+// store.on("error", () => {
+//     console.log("ERROR in MONGO SESSION STORE", err);
+// });
+
 const sessionOptions = {
+    // store,
     secret: "mysupersecretstring", 
     resave: false, 
     saveUninitialized: true, //use removing deprecated warining  
@@ -55,6 +70,7 @@ const sessionOptions = {
 //     res.send("Hi I am root");
 
 // });
+
 
 app.use(session(sessionOptions));
 app.use(flash());

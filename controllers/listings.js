@@ -3,7 +3,8 @@ const mbxGeocoding = require('@mapbox/mapbox-sdk/services/geocoding');
 const mapToken = process.env.MAP_TOKEN;
 const geocodingClient = mbxGeocoding({ accessToken: mapToken });
 
-router.get("/search", async (req, res) => {
+
+module.exports.searchListings = async (req, res) => {
   try {
       const { location } = req.query;
 
@@ -15,12 +16,13 @@ router.get("/search", async (req, res) => {
           location: { $regex: new RegExp(location, 'i') }, // case-insensitive partial match
       });
 
-      res.render("listings/searchResults", { listings, searchQuery: location }); // or return JSON if using API
+      res.render("listings/searchResults", { listings, searchQuery: location });
   } catch (err) {
       console.error("Search error:", err);
       res.status(500).send("Server Error");
     }
-});
+};
+
 
 // index route
 
